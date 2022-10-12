@@ -2,7 +2,7 @@ package de.arnes.rockpaperscissorsbackend.integration;
 
 import static de.arnes.rockpaperscissorsbackend.rest.model.game.Shape.PAPER;
 import static de.arnes.rockpaperscissorsbackend.rest.model.game.Shape.ROCK;
-import static de.arnes.rockpaperscissorsbackend.rest.model.game.Shape.SCISSOR;
+import static de.arnes.rockpaperscissorsbackend.rest.model.game.Shape.SCISSORS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ public class GameLogicControllerIntegrationTest {
 	 */
 	@Test
 	public void computerShouldReturnShape() {
-		assertThat(restTemplate.getForObject("http://localhost:" + port + "/computer", Shape.class)).isIn(ROCK, PAPER, SCISSOR);
+		assertThat(restTemplate.getForObject("http://localhost:" + port + "/computer", Shape.class)).isIn(ROCK, PAPER, SCISSORS);
 	}
 	
 }

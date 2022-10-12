@@ -19,7 +19,7 @@ public class GameLogicController {
 	 */
 	@GetMapping("/computer")
 	public Shape computer() {
-		return Shape.ROCK; // most simple implementation, only returns rock (for testing purposes)
+		return Shape.randomShape(); // more mature implementation, returns random shape
 	}
 
 }
