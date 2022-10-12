@@ -1,8 +1,8 @@
 package de.arnes.rockpaperscissorsbackend.integration;
 
-import static de.arnes.rockpaperscissorsbackend.rest.model.game.Shape.PAPER;
-import static de.arnes.rockpaperscissorsbackend.rest.model.game.Shape.ROCK;
-import static de.arnes.rockpaperscissorsbackend.rest.model.game.Shape.SCISSORS;
+import static de.arnes.rockpaperscissorsbackend.model.game.Shape.PAPER;
+import static de.arnes.rockpaperscissorsbackend.model.game.Shape.ROCK;
+import static de.arnes.rockpaperscissorsbackend.model.game.Shape.SCISSORS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
-import de.arnes.rockpaperscissorsbackend.rest.model.game.Shape;
+import de.arnes.rockpaperscissorsbackend.model.game.Shape;
 
 /**
  * 

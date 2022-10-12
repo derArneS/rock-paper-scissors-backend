@@ -1,4 +1,4 @@
-package de.arnes.rockpaperscissorsbackend.rest.model.game;
+package de.arnes.rockpaperscissorsbackend.model.game;
 
 import java.util.Arrays;
 import java.util.Collections;

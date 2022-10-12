@@ -3,7 +3,7 @@ package de.arnes.rockpaperscissorsbackend.rest.controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import de.arnes.rockpaperscissorsbackend.rest.model.game.Shape;
+import de.arnes.rockpaperscissorsbackend.model.game.Shape;
 
 /**
  * RestController for the game rock-paper-scissors.
