@@ -7,8 +7,8 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.arnes.rockpaperscissorsbackend.model.game.ComputerPlayer;
 import de.arnes.rockpaperscissorsbackend.model.game.Shape;
-import de.arnes.rockpaperscissorsbackend.rest.model.game.ComputerPlayer;
 
 /**
  * RestController for the game rock-paper-scissors.

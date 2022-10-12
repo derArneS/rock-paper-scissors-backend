@@ -1,6 +1,5 @@
-package de.arnes.rockpaperscissorsbackend.rest.model.game;
+package de.arnes.rockpaperscissorsbackend.model.game;
 
-import de.arnes.rockpaperscissorsbackend.model.game.Shape;
 import lombok.Getter;
 
 public class ComputerPlayer {
