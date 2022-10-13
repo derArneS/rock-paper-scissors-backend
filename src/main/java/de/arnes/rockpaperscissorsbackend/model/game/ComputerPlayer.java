@@ -2,14 +2,15 @@ package de.arnes.rockpaperscissorsbackend.model.game;
 
 import lombok.Getter;
 
+/**
+ * 
+ * @author Arne S.
+ *
+ */
 public class ComputerPlayer {
 
 	@Getter
-	private Shape shape;
-	
-	private ComputerPlayer() {
-		
-	}
+	private final Shape shape;
 	
 	private ComputerPlayer(Shape shape) {
 		this.shape = shape;

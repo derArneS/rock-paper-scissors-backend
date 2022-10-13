@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import lombok.Getter;
+
 /**
  * The three shapes needed for rock-paper-scissors.
  * 
@@ -13,10 +15,17 @@ import java.util.Random;
  */
 public enum Shape {
 
-	ROCK,
-	PAPER,
-	SCISSORS;
+	ROCK("SCISSORS"),
+	PAPER("ROCK"),
+	SCISSORS("PAPER");
 
+	@Getter
+	private List<String> winsAgainst;
+	
+	Shape(String... shapes) {
+		winsAgainst = Arrays.asList(shapes);
+	}
+	
 	private static final List<Shape> VALUES = Collections.unmodifiableList(Arrays.asList(values()));
 	private static final int SIZE = VALUES.size();
 	private static final Random RANDOM = new Random();

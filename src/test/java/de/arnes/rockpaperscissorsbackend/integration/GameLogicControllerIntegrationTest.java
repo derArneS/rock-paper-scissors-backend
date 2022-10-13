@@ -2,6 +2,7 @@ package de.arnes.rockpaperscissorsbackend.integration;
 
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -26,7 +27,6 @@ import de.arnes.rockpaperscissorsbackend.rest.controller.GameLogicController;
 @WebMvcTest(GameLogicController.class)
 public class GameLogicControllerIntegrationTest {
 
-
 	@Autowired
 	private MockMvc mockMvc;
 
@@ -35,7 +35,7 @@ public class GameLogicControllerIntegrationTest {
 	 */
 	@Test
 	public void computerShouldReturnShape() throws Exception {
-		//runs the endpoint /computer locally
+		// runs the endpoint /computer locally
 		final ResultActions result = mockMvc.perform(get(("/computer")));
 
 		result.andExpect(status().isOk());
@@ -43,4 +43,76 @@ public class GameLogicControllerIntegrationTest {
 				.andExpect(jsonPath("_links.self.href", endsWith("/computer"))); //
 	}
 
+	/**
+	 * Checks if the correct error message is thrown when a shape is missing
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void playShouldThrowMissingShapeExPlayerOne() throws Exception {
+		// runs the endpoint /play locally
+		final ResultActions result = mockMvc.perform(get(("/play")));
+
+		result.andExpect(status().isBadRequest());
+		result.andExpect(jsonPath("errorMessage", equalTo("Parameter 'playerOne' is missing."))); //
+	}
+
+	/**
+	 * Checks if the correct error message is thrown when a shape is missing
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void playShouldThrowMissingShapeExPlayerTwo() throws Exception {
+		// runs the endpoint /play locally
+		final ResultActions result = mockMvc.perform(get(("/play?playerOne=PAPER")));
+
+		result.andExpect(status().isBadRequest());
+		result.andExpect(jsonPath("errorMessage", equalTo("Parameter 'playerTwo' is missing."))); //
+	}
+
+	/**
+	 * Checks if the match ends in a draw
+	 */
+	@Test
+	public void playShouldReturnDraw() throws Exception {
+		// runs the endpoint /play locally
+		final ResultActions result = mockMvc.perform(get(("/play?playerOne=PAPER&playerTwo=PAPER")));
+
+		result.andExpect(status().isOk());
+		result.andExpect(jsonPath("result", is("DRAW"))) //
+				.andExpect(jsonPath("message", is("It's a draw."))) //
+				.andExpect(jsonPath("_links.self.href", endsWith("/play?playerOne=PAPER&playerTwo=PAPER")))
+				.andExpect(jsonPath("_links.computer.href", endsWith("/computer"))); //
+	}
+
+	/**
+	 * Checks if the match ends with player one winning
+	 */
+	@Test
+	public void playShouldReturnPlayerOneWinning() throws Exception {
+		// runs the endpoint /play locally
+		final ResultActions result = mockMvc.perform(get(("/play?playerOne=SCISSORS&playerTwo=PAPER")));
+
+		result.andExpect(status().isOk());
+		result.andExpect(jsonPath("result", is("PLAYER_ONE"))) //
+				.andExpect(jsonPath("message", is("Player one wins!"))) //
+				.andExpect(jsonPath("_links.self.href", endsWith("/play?playerOne=SCISSORS&playerTwo=PAPER"))) //
+				.andExpect(jsonPath("_links.computer.href", endsWith("/computer"))); //
+	}
+
+	/**
+	 * Checks if the match ends with player two winning
+	 */
+	@Test
+	public void playShouldReturnPlayerTwoWinning() throws Exception {
+		// runs the endpoint /play locally
+		final ResultActions result = mockMvc.perform(get(("/play?playerOne=PAPER&playerTwo=SCISSORS")));
+
+		result.andExpect(status().isOk());
+		result.andExpect(jsonPath("result", is("PLAYER_TWO"))) //
+				.andExpect(jsonPath("message", is("Player two wins!"))) //
+				.andExpect(jsonPath("_links.self.href", endsWith("/play?playerOne=PAPER&playerTwo=SCISSORS"))) //
+				.andExpect(jsonPath("_links.computer.href", endsWith("/computer"))); //
+	}
 }
