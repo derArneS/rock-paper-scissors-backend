@@ -44,7 +44,7 @@ public class GameLogicControllerIntegrationTest {
 	}
 
 	/**
-	 * Checks if the correct error message is thrown when a shape is missing
+	 * Checks if the correct error message is thrown when a shape is missing.
 	 * 
 	 * @throws Exception
 	 */
@@ -58,7 +58,7 @@ public class GameLogicControllerIntegrationTest {
 	}
 
 	/**
-	 * Checks if the correct error message is thrown when a shape is missing
+	 * Checks if the correct error message is thrown when a shape is missing.
 	 * 
 	 * @throws Exception
 	 */
@@ -69,6 +69,36 @@ public class GameLogicControllerIntegrationTest {
 
 		result.andExpect(status().isBadRequest());
 		result.andExpect(jsonPath("errorMessage", equalTo("Parameter 'playerTwo' is missing."))); //
+	}
+
+	/**
+	 * Checks if the correct error message is thrown when a shape is in a wrong
+	 * format.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void playShouldThrowWrongShapeExPlayerOne() throws Exception {
+		// runs the endpoint /play locally
+		final ResultActions result = mockMvc.perform(get(("/play?playerOne=abc")));
+
+		result.andExpect(status().isBadRequest());
+		result.andExpect(jsonPath("errorMessage", equalTo("The value of 'playerOne' (abc) is not a valid 'Shape'."))); //
+	}
+
+	/**
+	 * Checks if the correct error message is thrown when a shape is in a wrong
+	 * format.
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void playShouldThrowWrongShapeExPlayerTwo() throws Exception {
+		// runs the endpoint /play locally
+		final ResultActions result = mockMvc.perform(get(("/play?playerOne=PAPER&playerTwo=abc")));
+
+		result.andExpect(status().isBadRequest());
+		result.andExpect(jsonPath("errorMessage", equalTo("The value of 'playerTwo' (abc) is not a valid 'Shape'."))); //
 	}
 
 	/**
@@ -87,7 +117,7 @@ public class GameLogicControllerIntegrationTest {
 	}
 
 	/**
-	 * Checks if the match ends with player one winning
+	 * Checks if the match ends with player one winning.
 	 */
 	@Test
 	public void playShouldReturnPlayerOneWinning() throws Exception {
@@ -102,7 +132,7 @@ public class GameLogicControllerIntegrationTest {
 	}
 
 	/**
-	 * Checks if the match ends with player two winning
+	 * Checks if the match ends with player two winning.
 	 */
 	@Test
 	public void playShouldReturnPlayerTwoWinning() throws Exception {
