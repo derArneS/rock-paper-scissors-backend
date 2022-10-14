@@ -85,7 +85,7 @@ public class GameLogicController {
 	 * @return {@link EntityModel} of the {@link GameResponse} chosen from the
 	 *         computer.
 	 */
-	public EntityModel<GameResponse> createPlayResponse(Shape playerOne, Shape playerTwo, Result result) {
+	private EntityModel<GameResponse> createPlayResponse(Shape playerOne, Shape playerTwo, Result result) {
 		return EntityModel.of(new GameResponse(result),
 				linkTo(methodOn(GameLogicController.class).play(playerOne, playerTwo)).withSelfRel(), //
 				linkTo(methodOn(GameLogicController.class).computer()).withRel("computer"));
