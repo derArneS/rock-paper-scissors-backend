@@ -1,5 +1,6 @@
 package de.arnes.rockpaperscissorsbackend.model.game;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 /**
@@ -8,10 +9,11 @@ import lombok.Getter;
  *
  */
 @Getter
+@EqualsAndHashCode
 public class GameResponse {
-	
+
 	private final Result result;
-	
+
 	private final String message;
 
 	public GameResponse(Result result) {
