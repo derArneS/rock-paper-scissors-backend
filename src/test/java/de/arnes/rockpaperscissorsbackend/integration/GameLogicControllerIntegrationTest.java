@@ -18,7 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 /**
- * 
+ *
  * @author Arne S.
  *
  */
@@ -45,7 +45,7 @@ public class GameLogicControllerIntegrationTest {
 
 	/**
 	 * Checks if the correct error message is thrown when a shape is missing.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -59,7 +59,7 @@ public class GameLogicControllerIntegrationTest {
 
 	/**
 	 * Checks if the correct error message is thrown when a shape is missing.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -74,7 +74,7 @@ public class GameLogicControllerIntegrationTest {
 	/**
 	 * Checks if the correct error message is thrown when a shape is in a wrong
 	 * format.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -89,7 +89,7 @@ public class GameLogicControllerIntegrationTest {
 	/**
 	 * Checks if the correct error message is thrown when a shape is in a wrong
 	 * format.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test

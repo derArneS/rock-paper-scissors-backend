@@ -21,7 +21,7 @@ import lombok.extern.log4j.Log4j2;
 
 /**
  * RestController for the game rock-paper-scissors.
- * 
+ *
  * @author Arne S.
  *
  */
@@ -31,7 +31,7 @@ public class GameLogicController {
 
 	/**
 	 * Let's the computer chose its shape.
-	 * 
+	 *
 	 * @return Entity model of the {@link Shape} chosen from the computer.
 	 */
 	@GetMapping("/computer")
@@ -40,7 +40,7 @@ public class GameLogicController {
 
 		// Creation of the entity model, contains the data generated from the computer
 		// playing together with links to the next endpoints
-		EntityModel<ComputerPlayer> entityModel = EntityModel.of(comPlayer,
+		final EntityModel<ComputerPlayer> entityModel = EntityModel.of(comPlayer,
 				linkTo(methodOn(GameLogicController.class).computer()).withSelfRel(), //
 				Link.of(ServletUriComponentsBuilder.fromCurrentContextPath().build().toString()
 						+ "/play?playerOne=%1&playerTwo=" + comPlayer.getShape(), "play"));
@@ -51,15 +51,15 @@ public class GameLogicController {
 	/**
 	 * Endpoint for playing Rock-Paper-Scissors. Accepts the shapes of the players
 	 * and determines the winner.
-	 * 
+	 *
 	 * @param playerOne
 	 * @param playerTwo
-	 * 
+	 *
 	 * @return Entity model of the {@link GameResponse} chosen from the computer.
 	 */
 	@GetMapping("/play")
-	public EntityModel<GameResponse> play(@RequestParam("playerOne") Shape playerOne,
-			@RequestParam("playerTwo") Shape playerTwo) {
+	public EntityModel<GameResponse> play(@RequestParam("playerOne") final Shape playerOne,
+			@RequestParam("playerTwo") final Shape playerTwo) {
 		if (log.isDebugEnabled())
 			log.debug("Shape Player One:" + playerOne + ", Shape Player Two:" + playerTwo);
 
@@ -77,15 +77,16 @@ public class GameLogicController {
 
 	/**
 	 * Creates the entity model for the {@link GameResponse}.
-	 * 
+	 *
 	 * @param playerOne
 	 * @param playerTwo
 	 * @param result
-	 * 
+	 *
 	 * @return {@link EntityModel} of the {@link GameResponse} chosen from the
 	 *         computer.
 	 */
-	private EntityModel<GameResponse> createPlayResponse(Shape playerOne, Shape playerTwo, Result result) {
+	private EntityModel<GameResponse> createPlayResponse(final Shape playerOne, final Shape playerTwo,
+			final Result result) {
 		return EntityModel.of(new GameResponse(result),
 				linkTo(methodOn(GameLogicController.class).play(playerOne, playerTwo)).withSelfRel(), //
 				linkTo(methodOn(GameLogicController.class).computer()).withRel("computer"));

@@ -11,11 +11,13 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import de.arnes.rockpaperscissorsbackend.model.rest.authorization.exception.BadUsernameException;
+import de.arnes.rockpaperscissorsbackend.model.users.exception.UserNotFoundException;
 import lombok.extern.log4j.Log4j2;
 
 /**
  * Catches and handles exceptions thrown from the rest endpoints.
- * 
+ *
  * @author Arne S.
  *
  */
@@ -27,9 +29,9 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
 	 * Catches {@link MethodArgumentNotValidException} and customizes the response.
 	 */
 	@Override
-	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-			HttpHeaders headers, HttpStatus status, WebRequest request) {
-		String errorMessage = "The input is not valid.";
+	protected ResponseEntity<Object> handleMethodArgumentNotValid(final MethodArgumentNotValidException ex,
+			final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
+		final String errorMessage = "The input is not valid.";
 		log.warn(errorMessage);
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST) //
@@ -42,8 +44,9 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
 	 * response.
 	 */
 	@Override
-	protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
-			HttpHeaders headers, HttpStatus status, WebRequest request) {
+	protected ResponseEntity<Object> handleMissingServletRequestParameter(
+			final MissingServletRequestParameterException ex, final HttpHeaders headers, final HttpStatus status,
+			final WebRequest request) {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST) //
 				.header("Content-Type", "application/json") //
 				.body(new ErrorMessage("Parameter '" + ex.getParameterName() + "' is missing."));
@@ -54,17 +57,43 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
 	 * response.
 	 */
 	@ExceptionHandler(value = { MethodArgumentTypeMismatchException.class })
-	public ResponseEntity<ErrorMessage> handleMethodArgumentTypeMismatchException(
-			final MethodArgumentTypeMismatchException ex) {
+	public ResponseEntity<ErrorMessage> handleMethodArgumentTypeMismatch(final MethodArgumentTypeMismatchException ex) {
 
 		final String parameterName = ex.getName();
 		final String type = ex.getRequiredType().getSimpleName();
 		final Object value = ex.getValue();
 
-		String errorMessage = String.format("The value of '%s' (%s) is not a valid '%s'.", parameterName, value, type);
+		final String errorMessage = String.format("The value of '%s' (%s) is not a valid '%s'.", parameterName, value,
+				type);
 		log.warn(errorMessage);
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST) //
+				.header("Content-Type", "application/json") //
+				.body(new ErrorMessage(errorMessage));
+	}
+
+	/**
+	 * Catches {@link UserNotFoundException} and customizes the response.
+	 */
+	@ExceptionHandler(value = { UserNotFoundException.class })
+	public ResponseEntity<ErrorMessage> handleUserNotFound(final UserNotFoundException ex) {
+		final String errorMessage = ex.getMessage();
+		log.warn(errorMessage);
+
+		return ResponseEntity.status(HttpStatus.NOT_FOUND) //
+				.header("Content-Type", "application/json") //
+				.body(new ErrorMessage(errorMessage));
+	}
+
+	/**
+	 * Catches {@link BadUsernameException} and customizes the response.
+	 */
+	@ExceptionHandler(value = { BadUsernameException.class })
+	public ResponseEntity<ErrorMessage> handleBadUsername(final BadUsernameException ex) {
+		final String errorMessage = ex.getMessage();
+		log.warn(errorMessage);
+
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED) //
 				.header("Content-Type", "application/json") //
 				.body(new ErrorMessage(errorMessage));
 	}

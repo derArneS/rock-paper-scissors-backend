@@ -11,7 +11,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 /**
- * 
+ *
  * @author Arne S.
  *
  */
@@ -26,19 +26,18 @@ public class UserProfile {
 	@Column
 	private String id;
 
-	@Column
 	@NotNull
+	@Column(unique = true)
 	private String username;
 
-	@Column
 	@NotNull
+	@Column(unique = true)
 	private String email;
 
 	@Column
-	@NotNull
 	private String password;
 
-	public UserProfile(@NotNull String username, @NotNull String email, @NotNull String password) {
+	public UserProfile(@NotNull final String username, @NotNull final String email, @NotNull final String password) {
 		this.username = username;
 		this.email = email;
 		this.password = password;
