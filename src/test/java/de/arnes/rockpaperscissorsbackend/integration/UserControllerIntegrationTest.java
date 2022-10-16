@@ -12,7 +12,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,8 +19,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.google.gson.Gson;
 
-import de.arnes.rockpaperscissorsbackend.configuration.UserTestConfiguration;
-import de.arnes.rockpaperscissorsbackend.model.users.User;
+import de.arnes.rockpaperscissorsbackend.model.users.UserProfile;
 
 /**
  * 
@@ -31,7 +29,6 @@ import de.arnes.rockpaperscissorsbackend.model.users.User;
 @SpringBootTest
 @AutoConfigureMockMvc
 @RunWith(SpringRunner.class)
-@Import(UserTestConfiguration.class)
 public class UserControllerIntegrationTest {
 
 	@Autowired
@@ -43,8 +40,8 @@ public class UserControllerIntegrationTest {
 	 */
 	@Test
 	public void createUserShouldCreateAndReturnNewUser() throws Exception {
-		String body = new Gson()
-				.toJson(new User("IntegrationTestUser", "IntegrationTestUser@IntegrationTestUser.test", "StrongPW"));
+		String body = new Gson().toJson(
+				new UserProfile("IntegrationTestUser", "IntegrationTestUser@IntegrationTestUser.test", "StrongPW"));
 
 		// runs the endpoint /user locally
 		final ResultActions result = mockMvc

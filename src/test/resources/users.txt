@@ -1,4 +1,0 @@
-3391c6bb-ffca-4327-a393-7c649637f748,IntegrationTestUser,IntegrationTestUser@IntegrationTestUser.test,StrongPW
-1dc002df-ff17-4462-8eab-f777914478c9,TestUser,testuser@test-mail.test,testpassword123
-7f7aec91-99f5-4f2e-8405-e58cb9e15f38,IntegrationTestUser,IntegrationTestUser@IntegrationTestUser.test,StrongPW
-0edf532e-e576-4831-9df8-0f79cbea7093,TestUser,testuser@test-mail.test,testpassword123

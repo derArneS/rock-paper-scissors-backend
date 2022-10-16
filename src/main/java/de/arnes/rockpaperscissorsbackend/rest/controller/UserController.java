@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import de.arnes.rockpaperscissorsbackend.model.users.IUserRepository;
-import de.arnes.rockpaperscissorsbackend.model.users.User;
+import de.arnes.rockpaperscissorsbackend.model.users.UserProfile;
+import de.arnes.rockpaperscissorsbackend.model.users.UserService;
 
 /**
  * RestController for user profiles and basic authentication.
@@ -30,21 +30,21 @@ public class UserController {
 	@Value("${server.port}")
 	private int serverPort;
 
-	private final IUserRepository userRepository;
+	private UserService userService;
 
-	public UserController(IUserRepository userRepository) {
-		this.userRepository = userRepository;
+	public UserController(UserService userService) {
+		this.userService = userService;
 	}
 
 	/**
 	 * Validates the input, then creates the user and saves him in the repository.
 	 * 
 	 * @param userToCreate
-	 * @return Entity model of the {@link User} created from the input.
+	 * @return Entity model of the {@link UserProfile} created from the input.
 	 */
 	@PostMapping("/user")
-	public ResponseEntity<EntityModel<User>> createUser(@RequestBody @Valid User userToCreate) {
-		User savedUser = userRepository.createUser(userToCreate);
+	public ResponseEntity<EntityModel<UserProfile>> createUser(@RequestBody @Valid UserProfile userToCreate) {
+		UserProfile savedUser = userService.save(userToCreate);
 
 		// Builds the uri of the newly created user so it can easily be read again.
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().port(serverPort).path("/{id}")
