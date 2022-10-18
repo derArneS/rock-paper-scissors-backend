@@ -14,12 +14,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import de.arnes.rockpaperscissorsbackend.rest.security.authentication.AuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Arne S.
  *
  */
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfiguration {
@@ -41,6 +43,7 @@ public class SecurityConfiguration {
 
 	@Bean
 	SecurityFilterChain configure(final HttpSecurity http) throws Exception {
+		log.debug("Security configured");
 		return http.authorizeRequests() //
 				.antMatchers(HttpMethod.GET, "/user/{id}").authenticated() //
 				.antMatchers(HttpMethod.PUT, "/user/{id}").authenticated() //

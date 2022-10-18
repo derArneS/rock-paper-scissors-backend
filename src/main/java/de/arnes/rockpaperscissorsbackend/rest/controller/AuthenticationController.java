@@ -14,12 +14,14 @@ import de.arnes.rockpaperscissorsbackend.model.rest.authorization.Authentication
 import de.arnes.rockpaperscissorsbackend.rest.security.SecurityTokenService;
 import de.arnes.rockpaperscissorsbackend.rest.security.authentication.AuthenticationUserDetailsService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Arne S.
  *
  */
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class AuthenticationController {
@@ -38,11 +40,15 @@ public class AuthenticationController {
 	 */
 	@PostMapping("/authenticate")
 	public AuthenticationResponse authenticate(@RequestBody @Valid final AuthenticationRequest authenticationRequest) {
-		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(),
+		String username = authenticationRequest.getUsername();
+		
+		log.debug("/authenticate called, trying to authenticate {}", username);
+		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username,
 				authenticationRequest.getPassword()));
+		log.debug("user authenticated");
 
 		final UserDetails userDetails = authenticationUserDetailsService
-				.loadUserByUsername(authenticationRequest.getUsername());
+				.loadUserByUsername(username);
 
 		final AuthenticationResponse authenticationResponse = new AuthenticationResponse();
 		authenticationResponse.setAccessToken(tokenService.generateToken(userDetails));

@@ -40,3 +40,4 @@ mvnw.cmd
 src/main/resources/productiondb.trace.db
 src/test/resources/productiondb.trace.db
 src/test/resources/application.properties
+.DS_Store

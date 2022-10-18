@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * The three shapes needed for rock-paper-scissors.
@@ -13,6 +14,7 @@ import lombok.Getter;
  * @author Arne S.
  *
  */
+@Slf4j
 public enum Shape {
 
 	ROCK("SCISSORS"),
@@ -31,7 +33,9 @@ public enum Shape {
 	private static final Random RANDOM = new Random();
 
 	public static Shape randomShape() {
-		return VALUES.get(RANDOM.nextInt(SIZE));
+		Shape random = VALUES.get(RANDOM.nextInt(SIZE));
+		log.debug("Random selected shape is: {}", random);
+		return random;
 	}
 
 }

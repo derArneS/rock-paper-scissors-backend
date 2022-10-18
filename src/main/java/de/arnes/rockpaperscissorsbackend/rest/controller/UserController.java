@@ -24,6 +24,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import de.arnes.rockpaperscissorsbackend.model.users.UserProfile;
 import de.arnes.rockpaperscissorsbackend.model.users.UserService;
 import de.arnes.rockpaperscissorsbackend.model.users.exception.UserNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * RestController for user profiles and basic authentication.
@@ -31,6 +32,7 @@ import de.arnes.rockpaperscissorsbackend.model.users.exception.UserNotFoundExcep
  * @author Arne S.
  *
  */
+@Slf4j
 @RestController
 public class UserController {
 
@@ -52,6 +54,8 @@ public class UserController {
 	 */
 	@PostMapping("/user")
 	public ResponseEntity<EntityModel<UserProfile>> createUser(@RequestBody @Valid final UserProfile userToCreate) {
+		log.debug("/user called");
+		
 		final UserProfile savedUser = userService.create(userToCreate);
 
 		// Builds the uri of the newly created user so it can easily be read again.
@@ -76,6 +80,7 @@ public class UserController {
 	 */
 	@GetMapping("/user/{id}")
 	public EntityModel<UserProfile> readUserById(@PathVariable final String id) {
+		log.debug("/user/{} called", id);
 		final UserProfile readUser = userService.readById(id)
 				.orElseThrow(() -> new UserNotFoundException(String.format("User with id '%s' not found.", id)));
 
@@ -87,7 +92,7 @@ public class UserController {
 	}
 
 	/**
-	 * Searches
+	 * Searches all {@link UserProfile} with an username that contains the provided string.
 	 *
 	 * @param username
 	 * @return {@link CollectionModel} of {@link EntityModel}s of all users which
@@ -96,6 +101,7 @@ public class UserController {
 	@GetMapping("/search/user")
 	public CollectionModel<EntityModel<UserProfile>> searchUserByUsername(
 			@RequestParam("username") final String username) {
+		log.debug("/search/user called with username '{}'", username);
 		final List<UserProfile> readUsers = userService.findByUsernameContains(username);
 
 		final List<EntityModel<UserProfile>> entityModels = readUsers.stream().map(user -> {

@@ -13,7 +13,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import de.arnes.rockpaperscissorsbackend.model.rest.authorization.exception.BadUsernameException;
 import de.arnes.rockpaperscissorsbackend.model.users.exception.UserNotFoundException;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Catches and handles exceptions thrown from the rest endpoints.
@@ -21,7 +21,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Arne S.
  *
  */
-@Log4j2
+@Slf4j
 @ControllerAdvice
 public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -32,7 +32,7 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(final MethodArgumentNotValidException ex,
 			final HttpHeaders headers, final HttpStatus status, final WebRequest request) {
 		final String errorMessage = "The input is not valid.";
-		log.warn(errorMessage);
+		log.debug(errorMessage);
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST) //
 				.header("Content-Type", "application/json") //
@@ -47,9 +47,12 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleMissingServletRequestParameter(
 			final MissingServletRequestParameterException ex, final HttpHeaders headers, final HttpStatus status,
 			final WebRequest request) {
+		final String errorMessage = String.format("Parameter '%s' is missing.", ex.getParameterName());
+		log.debug(errorMessage);
+		
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST) //
 				.header("Content-Type", "application/json") //
-				.body(new ErrorMessage("Parameter '" + ex.getParameterName() + "' is missing."));
+				.body(new ErrorMessage(errorMessage));
 	}
 
 	/**
@@ -65,7 +68,7 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
 
 		final String errorMessage = String.format("The value of '%s' (%s) is not a valid '%s'.", parameterName, value,
 				type);
-		log.warn(errorMessage);
+		log.debug(errorMessage);
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST) //
 				.header("Content-Type", "application/json") //
@@ -78,7 +81,7 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(value = { UserNotFoundException.class })
 	public ResponseEntity<ErrorMessage> handleUserNotFound(final UserNotFoundException ex) {
 		final String errorMessage = ex.getMessage();
-		log.warn(errorMessage);
+		log.debug(errorMessage);
 
 		return ResponseEntity.status(HttpStatus.NOT_FOUND) //
 				.header("Content-Type", "application/json") //
@@ -91,7 +94,7 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(value = { BadUsernameException.class })
 	public ResponseEntity<ErrorMessage> handleBadUsername(final BadUsernameException ex) {
 		final String errorMessage = ex.getMessage();
-		log.warn(errorMessage);
+		log.debug(errorMessage);
 
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED) //
 				.header("Content-Type", "application/json") //

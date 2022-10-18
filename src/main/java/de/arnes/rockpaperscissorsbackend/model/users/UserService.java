@@ -7,11 +7,14 @@ import java.util.UUID;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  *
  * @author Arne S.
  *
  */
+@Slf4j
 @Component
 public class UserService {
 
@@ -32,6 +35,8 @@ public class UserService {
 	public UserProfile create(final UserProfile user) {
 		user.setId(UUID.randomUUID().toString());
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		
+		log.debug("create user with id '{}' and username '{}'", user.getId(), user.getUsername());
 		return userRepository.save(user);
 	}
 
@@ -49,6 +54,7 @@ public class UserService {
 		if (!oldUser.getPassword().equals(hashedPW))
 			user.setPassword(hashedPW);
 
+		log.debug("create user with id '{}' and username '{}'", user.getId(), user.getUsername());
 		return userRepository.save(user);
 	}
 
@@ -59,6 +65,7 @@ public class UserService {
 	 * @return {@link Optional}<{@link UserProfile}>
 	 */
 	public Optional<UserProfile> readById(final String id) {
+		log.debug("find user by id '{}'", id);
 		return userRepository.findById(id);
 	}
 
@@ -69,6 +76,7 @@ public class UserService {
 	 * @return {@link Optional}<{@link UserProfile}>
 	 */
 	public Optional<UserProfile> readByUsername(final String username) {
+		log.debug("find user by username '{}'");
 		return Optional.ofNullable(userRepository.findByUsername(username));
 	}
 
@@ -79,6 +87,7 @@ public class UserService {
 	 * @return {@link List}<{@link UserProfile}> with all the found users
 	 */
 	public List<UserProfile> findByUsernameContains(final String username) {
+		log.debug("find user if username contains {}", username);
 		return userRepository.findByUsernameContains(username);
 	}
 
@@ -88,6 +97,7 @@ public class UserService {
 	 * @param id
 	 */
 	public void deleteById(final String id) {
+		log.debug("delete user by id '{}'", id);
 		userRepository.deleteById(id);
 	}
 

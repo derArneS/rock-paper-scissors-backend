@@ -17,7 +17,7 @@ import de.arnes.rockpaperscissorsbackend.model.game.ComputerPlayer;
 import de.arnes.rockpaperscissorsbackend.model.game.GameResponse;
 import de.arnes.rockpaperscissorsbackend.model.game.Result;
 import de.arnes.rockpaperscissorsbackend.model.game.Shape;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * RestController for the game rock-paper-scissors.
@@ -25,7 +25,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Arne S.
  *
  */
-@Log4j2
+@Slf4j
 @RestController
 public class GameLogicController {
 
@@ -36,6 +36,7 @@ public class GameLogicController {
 	 */
 	@GetMapping("/computer")
 	public EntityModel<ComputerPlayer> computer() {
+		log.debug("/computer called");
 		final ComputerPlayer comPlayer = ComputerPlayer.play();
 
 		// Creation of the entity model, contains the data generated from the computer
@@ -60,8 +61,7 @@ public class GameLogicController {
 	@GetMapping("/play")
 	public EntityModel<GameResponse> play(@RequestParam("playerOne") final Shape playerOne,
 			@RequestParam("playerTwo") final Shape playerTwo) {
-		if (log.isDebugEnabled())
-			log.debug("Shape Player One:" + playerOne + ", Shape Player Two:" + playerTwo);
+		log.debug("/play called with playerOne: {}, playerTwo: {}", playerOne, playerTwo);
 
 		// draw
 		if (playerOne == playerTwo)
@@ -87,6 +87,8 @@ public class GameLogicController {
 	 */
 	private EntityModel<GameResponse> createPlayResponse(final Shape playerOne, final Shape playerTwo,
 			final Result result) {
+		log.debug("Result of the game: {}", result);
+		
 		return EntityModel.of(new GameResponse(result),
 				linkTo(methodOn(GameLogicController.class).play(playerOne, playerTwo)).withSelfRel(), //
 				linkTo(methodOn(GameLogicController.class).computer()).withRel("computer"));

@@ -18,12 +18,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import de.arnes.rockpaperscissorsbackend.rest.security.SecurityTokenService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Arne S.
  *
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AuthenticationFilter extends OncePerRequestFilter {
@@ -40,10 +42,13 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response,
 			final FilterChain chain) throws ServletException, IOException {
+		log.debug("AuthenticationFilter is called");
+
 		// look for Bearer auth header
 		final String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 		if (!StringUtils.hasText(header) || !header.startsWith("Bearer ")) {
 			// validation failed
+			log.debug("no header Authorization provided");
 			chain.doFilter(request, response);
 			return;
 		}
@@ -52,6 +57,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 		final String username = tokenService.validateTokenAndGetUsername(token);
 		if (username == null) {
 			// validation failed
+			log.debug("username for authorization can't be found in the repository");
 			chain.doFilter(request, response);
 			return;
 		}
@@ -64,6 +70,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		// continue with authenticated user
+		log.debug("user authentication successful");
 		chain.doFilter(request, response);
 	}
 

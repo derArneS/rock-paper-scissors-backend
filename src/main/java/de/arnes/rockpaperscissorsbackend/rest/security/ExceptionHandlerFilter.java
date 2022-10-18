@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 
 import de.arnes.rockpaperscissorsbackend.model.rest.authorization.exception.ExpiredTokenException;
 import de.arnes.rockpaperscissorsbackend.rest.advice.ErrorMessage;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * This filter is first in the chain. If a filter later in lane throws an
@@ -26,6 +27,7 @@ import de.arnes.rockpaperscissorsbackend.rest.advice.ErrorMessage;
  * @author Arne S.
  *
  */
+@Slf4j
 @Component
 public class ExceptionHandlerFilter extends OncePerRequestFilter {
 
@@ -35,6 +37,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
 		try {
 			filterChain.doFilter(request, response);
 		} catch (final ExpiredTokenException ex) {
+			log.debug("{} in filterchain catched", ex.getClass());
 			final ErrorMessage errorMessage = new ErrorMessage(ex.getMessage());
 
 			response.setStatus(HttpStatus.BAD_REQUEST.value());

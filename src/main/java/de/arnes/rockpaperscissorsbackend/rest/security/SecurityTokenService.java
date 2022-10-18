@@ -12,14 +12,14 @@ import com.auth0.jwt.interfaces.JWTVerifier;
 
 import de.arnes.rockpaperscissorsbackend.model.properties.JwtData;
 import de.arnes.rockpaperscissorsbackend.model.rest.authorization.exception.ExpiredTokenException;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Arne S.
  *
  */
-@Log4j2
+@Slf4j
 @Service
 public class SecurityTokenService {
 
@@ -43,8 +43,10 @@ public class SecurityTokenService {
 	 * @return created jwt
 	 */
 	public String generateToken(final UserDetails userDetails) {
+		Long expirationInMs = jwtData.getExpirationInMs();
+		log.debug("generate jwt with expire-time of '{}'", expirationInMs);
 		return JWT.create().withSubject(userDetails.getUsername())
-				.withExpiresAt(new Date(System.currentTimeMillis() + jwtData.getExpirationInMs())).sign(hmac512);
+				.withExpiresAt(new Date(System.currentTimeMillis() + expirationInMs)).sign(hmac512);
 	}
 
 	/**
