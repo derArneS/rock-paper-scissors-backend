@@ -41,3 +41,5 @@ src/main/resources/productiondb.trace.db
 src/test/resources/productiondb.trace.db
 src/test/resources/application.properties
 .DS_Store
+src/main/resources/productiondb.mv.db
+src/main/resource/productiondb.mv.db
