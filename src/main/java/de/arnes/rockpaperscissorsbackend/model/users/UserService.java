@@ -76,7 +76,7 @@ public class UserService {
 	 * @return {@link Optional}<{@link UserProfile}>
 	 */
 	public Optional<UserProfile> readByUsername(final String username) {
-		log.debug("find user by username '{}'");
+		log.debug("find user by username '{}'", username);
 		return Optional.ofNullable(userRepository.findByUsername(username));
 	}
 

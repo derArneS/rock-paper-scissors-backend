@@ -31,6 +31,31 @@ public class GameLogicControllerIntegrationTest {
 	private MockMvc mockMvc;
 
 	/**
+	 * Checks if all the shapes are returned correctly
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void getShapeShouldReturnAllShapes() throws Exception {
+		// runs the endpoint /shapes
+		final ResultActions result = mockMvc.perform(get("/shapes"));
+
+		result.andExpect(status().isOk());
+		result.andExpect(jsonPath("_embedded.resourceList[0].resource", is("ROCK"))) //
+				.andExpect(jsonPath("_embedded.resourceList[0]._links.play.href",
+						endsWith("/play?playerOne=ROCK&playerTwo=%1")))
+				.andExpect(jsonPath("_embedded.resourceList[0]._links.computer.href", endsWith("/computer")))
+				.andExpect(jsonPath("_embedded.resourceList[1].resource", is("PAPER"))) //
+				.andExpect(jsonPath("_embedded.resourceList[1]._links.play.href",
+						endsWith("/play?playerOne=PAPER&playerTwo=%1")))
+				.andExpect(jsonPath("_embedded.resourceList[1]._links.computer.href", endsWith("/computer")))
+				.andExpect(jsonPath("_embedded.resourceList[2].resource", is("SCISSORS"))) //
+				.andExpect(jsonPath("_embedded.resourceList[2]._links.play.href",
+						endsWith("/play?playerOne=SCISSORS&playerTwo=%1")))
+				.andExpect(jsonPath("_embedded.resourceList[2]._links.computer.href", endsWith("/computer"))); //
+	}
+
+	/**
 	 * Checks if the value returned by /computer is an allowed shape.
 	 */
 	@Test

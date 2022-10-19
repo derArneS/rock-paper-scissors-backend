@@ -13,6 +13,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.google.gson.Gson;
 
+import de.arnes.rockpaperscissorsbackend.model.rest.authorization.exception.BadUsernameException;
 import de.arnes.rockpaperscissorsbackend.model.rest.authorization.exception.ExpiredTokenException;
 import de.arnes.rockpaperscissorsbackend.rest.advice.ErrorMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
 			final FilterChain filterChain) throws ServletException, IOException {
 		try {
 			filterChain.doFilter(request, response);
-		} catch (final ExpiredTokenException ex) {
+		} catch (final ExpiredTokenException | BadUsernameException ex) {
 			log.debug("{} in filterchain catched", ex.getClass());
 			final ErrorMessage errorMessage = new ErrorMessage(ex.getMessage());
 
