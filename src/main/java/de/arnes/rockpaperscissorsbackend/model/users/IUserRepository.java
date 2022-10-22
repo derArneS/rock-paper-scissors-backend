@@ -11,8 +11,10 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface IUserRepository extends CrudRepository<UserProfile, String> {
 
-	UserProfile findByUsername(String username);
+	UserProfile findByUsernameIgnoreCase(String username);
 
 	List<UserProfile> findByUsernameContains(String username);
+	
+	UserProfile findByEmailIgnoreCase(String email);
 
 }

@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +23,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import de.arnes.rockpaperscissorsbackend.model.users.UserProfile;
 import de.arnes.rockpaperscissorsbackend.model.users.UserService;
+import de.arnes.rockpaperscissorsbackend.model.users.exception.UserAlreadyExistsException;
 import de.arnes.rockpaperscissorsbackend.model.users.exception.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
+@CrossOrigin
 @RestController
 public class UserController {
 
@@ -55,7 +57,11 @@ public class UserController {
 	@PostMapping("/user")
 	public ResponseEntity<EntityModel<UserProfile>> createUser(@RequestBody @Valid final UserProfile userToCreate) {
 		log.debug("/user called");
-		
+
+		// TODO: needs testing
+		if (userService.readByUsername(userToCreate.getUsername()).isPresent())
+			throw new UserAlreadyExistsException("The username you are trying to create already exists");
+
 		final UserProfile savedUser = userService.create(userToCreate);
 
 		// Builds the uri of the newly created user so it can easily be read again.
@@ -78,9 +84,10 @@ public class UserController {
 	 * @return {@link EntityModel} of the {@link UserProfile} read from the from the
 	 *         repository.
 	 */
-	@GetMapping("/user/{id}")
-	public EntityModel<UserProfile> readUserById(@PathVariable final String id) {
-		log.debug("/user/{} called", id);
+	@GetMapping(value = "/user", params = "id")
+	public EntityModel<UserProfile> readUserById(@RequestParam final String id) {
+		// TODO: only find all infos if the authorized user is searching himself
+		log.debug("/user?id={} called", id);
 		final UserProfile readUser = userService.readById(id)
 				.orElseThrow(() -> new UserNotFoundException(String.format("User with id '%s' not found.", id)));
 
@@ -92,7 +99,57 @@ public class UserController {
 	}
 
 	/**
-	 * Searches all {@link UserProfile} with an username that contains the provided string.
+	 * Read the user from the repository. If there is no user with the given
+	 * username a {@link UserNotFoundException} is thrown. Will never return a
+	 * password for the user, because the hashed password should not be returned to
+	 * the client.
+	 *
+	 * @param username
+	 * @return {@link EntityModel} of the {@link UserProfile} read from the from the
+	 *         repository.
+	 */
+	@GetMapping(value = "/user", params = "username")
+	public EntityModel<UserProfile> readUserByUsername(@RequestParam final String username) {
+		// TODO: only find all infos if the authorized user is searching himself
+		// TODO: needs testing
+		log.debug("/user?username={} called", username);
+		final UserProfile readUser = userService.readByUsername(username).orElseThrow(
+				() -> new UserNotFoundException(String.format("User with username '%s' not found.", username)));
+
+		// the hashed password should never be given out to the client.
+		readUser.setPassword(null);
+
+		return EntityModel.of(readUser, //
+				linkTo(methodOn(UserController.class).readUserByUsername(username)).withSelfRel()); //
+	}
+
+	/**
+	 * Read the user from the repository. If there is no user with the given e-mail
+	 * a {@link UserNotFoundException} is thrown. Will never return a password for
+	 * the user, because the hashed password should not be returned to the client.
+	 *
+	 * @param username
+	 * @return {@link EntityModel} of the {@link UserProfile} read from the from the
+	 *         repository.
+	 */
+	@GetMapping(value = "/user", params = "email")
+	public EntityModel<UserProfile> readUserByEmail(@RequestParam final String email) {
+		// TODO: only find all infos if the authorized user is searching himself
+		// TODO: needs testing
+		log.debug("/user?email={} called", email);
+		final UserProfile readUser = userService.readByEmail(email).orElseThrow(
+				() -> new UserNotFoundException(String.format("User with e-mail '%s' not found.", email)));
+
+		// the hashed password should never be given out to the client.
+		readUser.setPassword(null);
+
+		return EntityModel.of(readUser, //
+				linkTo(methodOn(UserController.class).readUserByEmail(email)).withSelfRel()); //
+	}
+
+	/**
+	 * Searches all {@link UserProfile} with an username that contains the provided
+	 * string.
 	 *
 	 * @param username
 	 * @return {@link CollectionModel} of {@link EntityModel}s of all users which

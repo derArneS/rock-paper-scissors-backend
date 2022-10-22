@@ -10,6 +10,8 @@ import lombok.Data;
  */
 @Data
 public class Resource<T> {
+	
+	private final String name;
 
 	private final T resource;
 }

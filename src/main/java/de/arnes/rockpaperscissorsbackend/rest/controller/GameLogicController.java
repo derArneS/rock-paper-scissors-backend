@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
+@CrossOrigin
 @RestController
 public class GameLogicController {
 
@@ -45,7 +47,7 @@ public class GameLogicController {
 	public CollectionModel<EntityModel<Resource<Shape>>> getShapes() {
 		log.debug("get@/shapes called");
 		final List<EntityModel<Resource<Shape>>> entityModels = Arrays.asList(Shape.values()).stream()
-				.map(shape -> EntityModel.of(new Resource<Shape>(shape), // linkTo(method)))
+				.map(shape -> EntityModel.of(new Resource<Shape>(shape.toString().toLowerCase(), shape), // linkTo(method)))
 						Link.of(ServletUriComponentsBuilder.fromCurrentContextPath().build().toString()
 								+ "/play?playerOne=" + shape + "&playerTwo=%1", "play"),
 						Link.of(ServletUriComponentsBuilder.fromCurrentContextPath().build().toString() + "/computer",

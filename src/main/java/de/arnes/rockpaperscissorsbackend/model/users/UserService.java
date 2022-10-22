@@ -28,6 +28,7 @@ public class UserService {
 
 	/**
 	 * Creates the {@link UserProfile} with a random generated id.
+	 * Warning: This method overrides the id!
 	 *
 	 * @param user
 	 * @return created {@link UserProfile}
@@ -77,7 +78,18 @@ public class UserService {
 	 */
 	public Optional<UserProfile> readByUsername(final String username) {
 		log.debug("find user by username '{}'", username);
-		return Optional.ofNullable(userRepository.findByUsername(username));
+		return Optional.ofNullable(userRepository.findByUsernameIgnoreCase(username));
+	}
+	
+	/**
+	 * Finds the user in the repository.
+	 *
+	 * @param id
+	 * @return {@link Optional}<{@link UserProfile}>
+	 */
+	public Optional<UserProfile> readByEmail(final String email) {
+		log.debug("find user by email '{}'", email);
+		return Optional.ofNullable(userRepository.findByEmailIgnoreCase(email));
 	}
 
 	/**

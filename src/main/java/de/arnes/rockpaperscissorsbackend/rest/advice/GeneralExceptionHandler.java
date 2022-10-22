@@ -12,6 +12,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import de.arnes.rockpaperscissorsbackend.model.rest.authorization.exception.BadUsernameException;
+import de.arnes.rockpaperscissorsbackend.model.users.UserProfile;
+import de.arnes.rockpaperscissorsbackend.model.users.exception.UserAlreadyExistsException;
 import de.arnes.rockpaperscissorsbackend.model.users.exception.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -79,13 +81,13 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
 	 * Catches {@link UserNotFoundException} and customizes the response.
 	 */
 	@ExceptionHandler(value = { UserNotFoundException.class })
-	public ResponseEntity<ErrorMessage> handleUserNotFound(final UserNotFoundException ex) {
+	public ResponseEntity<UserProfile> handleUserNotFound(final UserNotFoundException ex) {
 		final String errorMessage = ex.getMessage();
 		log.debug(errorMessage);
 
-		return ResponseEntity.status(HttpStatus.NOT_FOUND) //
+		return ResponseEntity.status(HttpStatus.OK) //
 				.header("Content-Type", "application/json") //
-				.body(new ErrorMessage(errorMessage));
+				.build();
 	}
 
 	/**
@@ -97,6 +99,19 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
 		log.debug(errorMessage);
 
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED) //
+				.header("Content-Type", "application/json") //
+				.body(new ErrorMessage(errorMessage));
+	}
+	
+	/**
+	 * Catches {@link UserAlreadyExistsException} and customizes the response.
+	 */
+	@ExceptionHandler(value = {UserAlreadyExistsException.class})
+	public ResponseEntity<ErrorMessage> handleUserAlreadyExists(final UserAlreadyExistsException ex) {
+		final String errorMessage = ex.getMessage();
+		log.debug(errorMessage);
+
+		return ResponseEntity.status(HttpStatus.CONFLICT) //
 				.header("Content-Type", "application/json") //
 				.body(new ErrorMessage(errorMessage));
 	}

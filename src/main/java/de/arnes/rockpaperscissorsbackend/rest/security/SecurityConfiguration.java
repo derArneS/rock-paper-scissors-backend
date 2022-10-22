@@ -45,7 +45,6 @@ public class SecurityConfiguration {
 	SecurityFilterChain configure(final HttpSecurity http) throws Exception {
 		log.debug("Security configured");
 		return http.authorizeRequests() //
-				.antMatchers(HttpMethod.GET, "/user/{id}").authenticated() //
 				.antMatchers(HttpMethod.PUT, "/user/{id}").authenticated() //
 				.antMatchers(HttpMethod.DELETE, "/user/{id}").authenticated() //
 				.antMatchers(HttpMethod.GET, "/search/user").authenticated() //
@@ -54,8 +53,10 @@ public class SecurityConfiguration {
 				.and().addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class) //
 				.addFilterBefore(exceptionHandlerFilter, authenticationFilter.getClass()) //
 				.csrf().disable() //
-				.headers().frameOptions().disable() // for h2 db console
+				.cors()
+				.and().headers().frameOptions().disable() // for h2 db console
 				.and().build();
 	}
+	
 
 }
