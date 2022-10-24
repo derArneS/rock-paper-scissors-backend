@@ -20,7 +20,7 @@ import de.arnes.rockpaperscissorsbackend.rest.controller.GameLogicController;
  */
 public class GameLogicControllerTest {
 
-	private final GameLogicController testee = new GameLogicController();
+	private final GameLogicController testee = new GameLogicController(null, null, null);
 
 	/**
 	 * Checks if the method createPlayResponse generates the correct
@@ -29,7 +29,7 @@ public class GameLogicControllerTest {
 	@Test
 	public void createPlayResponseShouldReturnCorrectEntityModel() {
 		final EntityModel<GameResponse> expected = EntityModel.of(new GameResponse(Result.DRAW),
-				linkTo(methodOn(GameLogicController.class).play(Shape.ROCK, Shape.ROCK)).withSelfRel(), //
+				linkTo(methodOn(GameLogicController.class).play(null, Shape.ROCK, Shape.ROCK)).withSelfRel(), //
 				linkTo(methodOn(GameLogicController.class).computer()).withRel("computer"));
 
 		// Method needs reflection because it is private.

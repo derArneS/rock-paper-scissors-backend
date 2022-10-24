@@ -25,10 +25,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import de.arnes.rockpaperscissorsbackend.model.users.UserProfile;
-import de.arnes.rockpaperscissorsbackend.model.users.UserService;
-import de.arnes.rockpaperscissorsbackend.model.users.exception.UserAlreadyExistsException;
-import de.arnes.rockpaperscissorsbackend.model.users.exception.UserNotFoundException;
+import de.arnes.rockpaperscissorsbackend.model.users.profile.UserProfile;
+import de.arnes.rockpaperscissorsbackend.model.users.profile.UserProfileService;
+import de.arnes.rockpaperscissorsbackend.model.users.profile.exception.UserAlreadyExistsException;
+import de.arnes.rockpaperscissorsbackend.model.users.profile.exception.UserNotFoundException;
+import de.arnes.rockpaperscissorsbackend.model.users.statistics.UserDTO;
+import de.arnes.rockpaperscissorsbackend.model.users.statistics.UserStatistics;
+import de.arnes.rockpaperscissorsbackend.model.users.statistics.UserStatisticsService;
 import de.arnes.rockpaperscissorsbackend.rest.security.SecurityTokenService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,12 +49,16 @@ public class UserController {
 	@Value("${server.port}")
 	private int serverPort;
 
-	private final UserService userService;
+	private final UserProfileService userService;
+
+	private final UserStatisticsService userStatisticsService;
 
 	private final SecurityTokenService securityTokenService;
 
-	public UserController(final UserService userService, SecurityTokenService securityTokenService) {
+	public UserController(final UserProfileService userService, SecurityTokenService securityTokenService,
+			UserStatisticsService userStatisticsService) {
 		this.userService = userService;
+		this.userStatisticsService = userStatisticsService;
 		this.securityTokenService = securityTokenService;
 	}
 
@@ -103,7 +110,7 @@ public class UserController {
 		if (!verifyUser(jwt, readUser.getUsername())) {
 			readUser = anonUser(readUser);
 		}
-		
+
 		// the hashed password should never be given out to the client.
 		readUser.setPassword(null);
 
@@ -133,7 +140,7 @@ public class UserController {
 		if (!verifyUser(jwt, readUser.getUsername())) {
 			readUser = anonUser(readUser);
 		}
-		
+
 		// the hashed password should never be given out to the client.
 		readUser.setPassword(null);
 
@@ -151,21 +158,26 @@ public class UserController {
 	 *         repository.
 	 */
 	@GetMapping(value = "/user", params = "email")
-	public EntityModel<UserProfile> readUserByEmail(
+	public EntityModel<UserDTO> readUserByEmail(
 			@RequestHeader(value = "auth-token", required = false) final String jwt, @RequestParam final String email) {
 		// TODO: needs more testing
 		log.debug("get@/user?email={} called", email);
 		UserProfile readUser = userService.readByEmail(email)
 				.orElseThrow(() -> new UserNotFoundException(String.format("User with e-mail '%s' not found.", email)));
 
+		UserStatistics stats = null;
 		if (!verifyUser(jwt, readUser.getUsername())) {
+			log.debug("jwt doesn't fit the read user");
 			readUser = anonUser(readUser);
+		} else {
+			log.debug("jwt fits the user, reading his stats");
+			stats = userStatisticsService.findById(readUser.getId());
 		}
 
 		// the hashed password should never be given out to the client.
 		readUser.setPassword(null);
 
-		return EntityModel.of(readUser, //
+		return EntityModel.of(new UserDTO(readUser, stats), //
 				linkTo(methodOn(UserController.class).readUserByEmail(null, email)).withSelfRel()); //
 	}
 

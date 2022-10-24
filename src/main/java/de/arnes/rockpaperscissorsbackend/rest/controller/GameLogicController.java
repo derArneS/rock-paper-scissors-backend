@@ -15,6 +15,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -24,6 +25,12 @@ import de.arnes.rockpaperscissorsbackend.model.game.GameResponse;
 import de.arnes.rockpaperscissorsbackend.model.game.Resource;
 import de.arnes.rockpaperscissorsbackend.model.game.Result;
 import de.arnes.rockpaperscissorsbackend.model.game.Shape;
+import de.arnes.rockpaperscissorsbackend.model.users.profile.UserProfile;
+import de.arnes.rockpaperscissorsbackend.model.users.profile.UserProfileService;
+import de.arnes.rockpaperscissorsbackend.model.users.profile.exception.UserNotFoundException;
+import de.arnes.rockpaperscissorsbackend.model.users.statistics.UserStatisticsService;
+import de.arnes.rockpaperscissorsbackend.rest.security.SecurityTokenService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -35,7 +42,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @CrossOrigin
 @RestController
+@RequiredArgsConstructor
 public class GameLogicController {
+
+	private final UserProfileService userProfileService;
+
+	private final UserStatisticsService userStatisticsService;
+
+	private final SecurityTokenService securityTokenService;
 
 	/**
 	 * Endpoint to inform the client of all possible shapes in this instance of the
@@ -87,9 +101,25 @@ public class GameLogicController {
 	 * @return Entity model of the {@link GameResponse} chosen from the computer.
 	 */
 	@GetMapping("/play")
-	public EntityModel<GameResponse> play(@RequestParam("playerOne") final Shape playerOne,
+	public EntityModel<GameResponse> play(@RequestHeader(value = "auth-token", required = false) final String jwt,
+			@RequestParam("playerOne") final Shape playerOne, //
 			@RequestParam("playerTwo") final Shape playerTwo) {
 		log.debug("get@/play called with playerOne: {}, playerTwo: {}", playerOne, playerTwo);
+
+		if (null != jwt) {
+			final String username = securityTokenService.validateTokenAndGetUsername(jwt);
+			log.debug(String.format("user '%s' sends his token for statistics", username));
+			
+			if (null != username) {
+				UserProfile readUser = userProfileService.readByUsername(username).orElseThrow(
+						() -> new UserNotFoundException(String.format("User with username '%s' not found.", username)));
+
+				userStatisticsService.start(readUser.getId()) //
+						.addPlayerShape(playerOne) //
+						.addComputerShape(playerTwo) //
+						.save();
+			}
+		}
 
 		// draw
 		if (playerOne == playerTwo)
@@ -118,7 +148,7 @@ public class GameLogicController {
 		log.debug("Result of the game: {}", result);
 
 		return EntityModel.of(new GameResponse(result),
-				linkTo(methodOn(GameLogicController.class).play(playerOne, playerTwo)).withSelfRel(), //
+				linkTo(methodOn(GameLogicController.class).play(null, playerOne, playerTwo)).withSelfRel(), //
 				linkTo(methodOn(GameLogicController.class).computer()).withRel("computer"));
 	}
 

@@ -1,4 +1,4 @@
-package de.arnes.rockpaperscissorsbackend.model.users;
+package de.arnes.rockpaperscissorsbackend.model.users.profile;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import org.springframework.data.repository.CrudRepository;
  * @author Arne S.
  *
  */
-public interface IUserRepository extends CrudRepository<UserProfile, String> {
+public interface IUserProfileRepository extends CrudRepository<UserProfile, String> {
 
 	UserProfile findByUsernameIgnoreCase(String username);
 

@@ -1,4 +1,4 @@
-package de.arnes.rockpaperscissorsbackend.model.users.exception;
+package de.arnes.rockpaperscissorsbackend.model.users.profile.exception;
 
 /**
  * 

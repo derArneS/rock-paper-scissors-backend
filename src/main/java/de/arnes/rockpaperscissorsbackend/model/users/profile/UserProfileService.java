@@ -1,4 +1,4 @@
-package de.arnes.rockpaperscissorsbackend.model.users;
+package de.arnes.rockpaperscissorsbackend.model.users.profile;
 
 import java.util.List;
 import java.util.Optional;
@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import de.arnes.rockpaperscissorsbackend.model.users.statistics.UserStatisticsService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -16,19 +17,23 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
-public class UserService {
+public class UserProfileService {
 
-	private final IUserRepository userRepository;
+	private final IUserProfileRepository userRepository;
+
+	private final UserStatisticsService userStatisticsService;
 
 	private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-	public UserService(final IUserRepository userRepository) {
+	public UserProfileService(final IUserProfileRepository userRepository,
+			UserStatisticsService userStatisticsService) {
 		this.userRepository = userRepository;
+		this.userStatisticsService = userStatisticsService;
 	}
 
 	/**
-	 * Creates the {@link UserProfile} with a random generated id.
-	 * Warning: This method overrides the id!
+	 * Creates the {@link UserProfile} with a random generated id. Warning: This
+	 * method overrides the id!
 	 *
 	 * @param user
 	 * @return created {@link UserProfile}
@@ -36,9 +41,14 @@ public class UserService {
 	public UserProfile create(final UserProfile user) {
 		user.setId(UUID.randomUUID().toString());
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		
+
 		log.debug("create user with id '{}' and username '{}'", user.getId(), user.getUsername());
-		return userRepository.save(user);
+
+		UserProfile createdUser = userRepository.save(user);
+		// create entry in statistics table
+		userStatisticsService.create(createdUser.getId());
+		
+		return createdUser;
 	}
 
 	/**
@@ -55,7 +65,7 @@ public class UserService {
 		if (!oldUser.getPassword().equals(hashedPW))
 			user.setPassword(hashedPW);
 
-		log.debug("create user with id '{}' and username '{}'", user.getId(), user.getUsername());
+		log.debug("save user with id '{}' and username '{}'", user.getId(), user.getUsername());
 		return userRepository.save(user);
 	}
 
@@ -80,7 +90,7 @@ public class UserService {
 		log.debug("find user by username '{}'", username);
 		return Optional.ofNullable(userRepository.findByUsernameIgnoreCase(username));
 	}
-	
+
 	/**
 	 * Finds the user in the repository.
 	 *

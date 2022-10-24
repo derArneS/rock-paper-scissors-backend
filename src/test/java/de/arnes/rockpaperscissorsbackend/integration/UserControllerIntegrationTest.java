@@ -28,8 +28,8 @@ import com.google.gson.Gson;
 
 import de.arnes.rockpaperscissorsbackend.model.properties.JwtData;
 import de.arnes.rockpaperscissorsbackend.model.rest.authorization.UserPrincipal;
-import de.arnes.rockpaperscissorsbackend.model.users.UserProfile;
-import de.arnes.rockpaperscissorsbackend.model.users.UserService;
+import de.arnes.rockpaperscissorsbackend.model.users.profile.UserProfile;
+import de.arnes.rockpaperscissorsbackend.model.users.profile.UserProfileService;
 import de.arnes.rockpaperscissorsbackend.rest.security.SecurityTokenService;
 
 /**
@@ -46,7 +46,7 @@ public class UserControllerIntegrationTest {
 	private MockMvc mockMvc;
 
 	@Autowired
-	private UserService userService;
+	private UserProfileService userService;
 
 	@Autowired
 	private JwtData jwtData;

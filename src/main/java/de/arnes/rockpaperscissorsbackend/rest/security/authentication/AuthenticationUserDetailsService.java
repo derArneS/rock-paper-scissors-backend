@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 
 import de.arnes.rockpaperscissorsbackend.model.rest.authorization.UserPrincipal;
 import de.arnes.rockpaperscissorsbackend.model.rest.authorization.exception.BadUsernameException;
-import de.arnes.rockpaperscissorsbackend.model.users.UserProfile;
-import de.arnes.rockpaperscissorsbackend.model.users.UserService;
+import de.arnes.rockpaperscissorsbackend.model.users.profile.UserProfile;
+import de.arnes.rockpaperscissorsbackend.model.users.profile.UserProfileService;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -23,7 +23,7 @@ public class AuthenticationUserDetailsService implements UserDetailsService {
 
 	public static final String ROLE_USER = "ROLE_USER";
 
-	private final UserService userService;
+	private final UserProfileService userService;
 
 	@Override
 	public UserDetails loadUserByUsername(final String username) {

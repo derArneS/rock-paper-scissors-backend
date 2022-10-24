@@ -1,4 +1,4 @@
-package de.arnes.rockpaperscissorsbackend.model.users;
+package de.arnes.rockpaperscissorsbackend.model.users.profile;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
