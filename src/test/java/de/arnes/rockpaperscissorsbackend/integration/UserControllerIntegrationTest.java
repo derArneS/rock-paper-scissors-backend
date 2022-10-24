@@ -17,7 +17,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -56,8 +55,8 @@ public class UserControllerIntegrationTest {
 
 	@Before
 	public void initDb() {
-		userProfile = new UserProfile("Arne", "test@test.de", "password");
-		userProfile = userService.create(userProfile);
+		UserProfile tempUserProfile = new UserProfile("Arne", "test@test.de", "password");
+		userProfile = userService.create(tempUserProfile);
 	}
 
 	@After
@@ -117,33 +116,37 @@ public class UserControllerIntegrationTest {
 		final SecurityTokenService tokenService = new SecurityTokenService(jwtData);
 		final UserPrincipal userPrincipal = new UserPrincipal("Arne", "password", Collections.emptyList());
 
-		final ResultActions result = mockMvc.perform(get("/user/" + userProfile.getId())
-				.header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenService.generateToken(userPrincipal)));
+		final ResultActions result = mockMvc.perform(
+				get("/user?id=" + userProfile.getId()).header("auth-token", tokenService.generateToken(userPrincipal)));
 
 		result.andExpect(status().isOk());
 		result.andExpect(jsonPath("id", is(userProfile.getId())))
 				.andExpect(jsonPath("username", is(userProfile.getUsername())))
 				.andExpect(jsonPath("email", is(userProfile.getEmail())))
-				.andExpect(jsonPath("_links.self.href", endsWith("/user/" + userProfile.getId())));
+				.andExpect(jsonPath("_links.self.href", endsWith("/user?id=" + userProfile.getId())));
 	}
 
 	/**
-	 * Checks if the authorization for the endpoint /user/{id} with
-	 * {@link HttpMethod} GET fails, because the token is not included in the
-	 * headers.
+	 * Checks if the authorization for the endpoint /user?id={id} with
+	 * {@link HttpMethod} GET only returns the username, because the token is not
+	 * included in the headers.
 	 *
 	 * @throws Exception
 	 */
 	@Test
 	public void readUserByIdShouldReturnForbidden() throws Exception {
-		final ResultActions result = mockMvc.perform(get("/user/" + userProfile.getId()));
+		final ResultActions result = mockMvc.perform(get("/user?id=" + userProfile.getId()));
 
-		result.andExpect(status().isForbidden());
+		result.andExpect(status().isOk());
+		result.andExpect(jsonPath("id").doesNotExist())
+				.andExpect(jsonPath("username", is(userProfile.getUsername())))
+				.andExpect(jsonPath("email").doesNotExist())
+				.andExpect(jsonPath("_links.self.href", endsWith("/user?id=" + userProfile.getId())));
 	}
 
 	/**
-	 * Checks if the endpoint /user/{id} returns {@link HttpStatus} NOT_FOUND and
-	 * the correct error message, when the id is not found in the repository.
+	 * Checks if the endpoint /user?id={id} returns {@link HttpStatus} OK and an
+	 * empty body when the id is not found in the repository.
 	 *
 	 * @throws Exception
 	 */
@@ -152,11 +155,11 @@ public class UserControllerIntegrationTest {
 		final SecurityTokenService tokenService = new SecurityTokenService(jwtData);
 		final UserPrincipal userPrincipal = new UserPrincipal("Arne", "password", Collections.emptyList());
 
-		final ResultActions result = mockMvc.perform(get("/user/abc").header(HttpHeaders.AUTHORIZATION,
-				"Bearer " + tokenService.generateToken(userPrincipal)));
+		final ResultActions result = mockMvc
+				.perform(get("/user?id=123").header("auth-token", tokenService.generateToken(userPrincipal)));
 
-		result.andExpect(status().isNotFound());
-		result.andExpect(jsonPath("errorMessage", is("User with id 'abc' not found.")));
+		result.andExpect(status().isOk());
+		result.andExpect(jsonPath("$").doesNotExist());
 	}
 
 }

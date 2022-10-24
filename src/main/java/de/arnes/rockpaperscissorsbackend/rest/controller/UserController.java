@@ -12,11 +12,15 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -25,6 +29,7 @@ import de.arnes.rockpaperscissorsbackend.model.users.UserProfile;
 import de.arnes.rockpaperscissorsbackend.model.users.UserService;
 import de.arnes.rockpaperscissorsbackend.model.users.exception.UserAlreadyExistsException;
 import de.arnes.rockpaperscissorsbackend.model.users.exception.UserNotFoundException;
+import de.arnes.rockpaperscissorsbackend.rest.security.SecurityTokenService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -43,8 +48,11 @@ public class UserController {
 
 	private final UserService userService;
 
-	public UserController(final UserService userService) {
+	private final SecurityTokenService securityTokenService;
+
+	public UserController(final UserService userService, SecurityTokenService securityTokenService) {
 		this.userService = userService;
+		this.securityTokenService = securityTokenService;
 	}
 
 	/**
@@ -56,7 +64,7 @@ public class UserController {
 	 */
 	@PostMapping("/user")
 	public ResponseEntity<EntityModel<UserProfile>> createUser(@RequestBody @Valid final UserProfile userToCreate) {
-		log.debug("/user called");
+		log.debug("post@/user called");
 
 		// TODO: needs testing
 		if (userService.readByUsername(userToCreate.getUsername()).isPresent())
@@ -85,17 +93,22 @@ public class UserController {
 	 *         repository.
 	 */
 	@GetMapping(value = "/user", params = "id")
-	public EntityModel<UserProfile> readUserById(@RequestParam final String id) {
-		// TODO: only find all infos if the authorized user is searching himself
-		log.debug("/user?id={} called", id);
-		final UserProfile readUser = userService.readById(id)
+	public EntityModel<UserProfile> readUserById(
+			@RequestHeader(value = "auth-token", required = false) final String jwt, @RequestParam final String id) {
+		// TODO: needs more testing
+		log.debug("get@/user?id={} called", id);
+		UserProfile readUser = userService.readById(id)
 				.orElseThrow(() -> new UserNotFoundException(String.format("User with id '%s' not found.", id)));
 
+		if (!verifyUser(jwt, readUser.getUsername())) {
+			readUser = anonUser(readUser);
+		}
+		
 		// the hashed password should never be given out to the client.
 		readUser.setPassword(null);
 
 		return EntityModel.of(readUser, //
-				linkTo(methodOn(UserController.class).readUserById(id)).withSelfRel()); //
+				linkTo(methodOn(UserController.class).readUserById(null, id)).withSelfRel()); //
 	}
 
 	/**
@@ -109,18 +122,23 @@ public class UserController {
 	 *         repository.
 	 */
 	@GetMapping(value = "/user", params = "username")
-	public EntityModel<UserProfile> readUserByUsername(@RequestParam final String username) {
-		// TODO: only find all infos if the authorized user is searching himself
+	public EntityModel<UserProfile> readUserByUsername(
+			@RequestHeader(value = "auth-token", required = false) final String jwt,
+			@RequestParam final String username) {
 		// TODO: needs testing
-		log.debug("/user?username={} called", username);
-		final UserProfile readUser = userService.readByUsername(username).orElseThrow(
+		log.debug("get@/user?username={} called", username);
+		UserProfile readUser = userService.readByUsername(username).orElseThrow(
 				() -> new UserNotFoundException(String.format("User with username '%s' not found.", username)));
 
+		if (!verifyUser(jwt, readUser.getUsername())) {
+			readUser = anonUser(readUser);
+		}
+		
 		// the hashed password should never be given out to the client.
 		readUser.setPassword(null);
 
 		return EntityModel.of(readUser, //
-				linkTo(methodOn(UserController.class).readUserByUsername(username)).withSelfRel()); //
+				linkTo(methodOn(UserController.class).readUserByUsername(null, username)).withSelfRel()); //
 	}
 
 	/**
@@ -133,18 +151,22 @@ public class UserController {
 	 *         repository.
 	 */
 	@GetMapping(value = "/user", params = "email")
-	public EntityModel<UserProfile> readUserByEmail(@RequestParam final String email) {
-		// TODO: only find all infos if the authorized user is searching himself
-		// TODO: needs testing
-		log.debug("/user?email={} called", email);
-		final UserProfile readUser = userService.readByEmail(email).orElseThrow(
-				() -> new UserNotFoundException(String.format("User with e-mail '%s' not found.", email)));
+	public EntityModel<UserProfile> readUserByEmail(
+			@RequestHeader(value = "auth-token", required = false) final String jwt, @RequestParam final String email) {
+		// TODO: needs more testing
+		log.debug("get@/user?email={} called", email);
+		UserProfile readUser = userService.readByEmail(email)
+				.orElseThrow(() -> new UserNotFoundException(String.format("User with e-mail '%s' not found.", email)));
+
+		if (!verifyUser(jwt, readUser.getUsername())) {
+			readUser = anonUser(readUser);
+		}
 
 		// the hashed password should never be given out to the client.
 		readUser.setPassword(null);
 
 		return EntityModel.of(readUser, //
-				linkTo(methodOn(UserController.class).readUserByEmail(email)).withSelfRel()); //
+				linkTo(methodOn(UserController.class).readUserByEmail(null, email)).withSelfRel()); //
 	}
 
 	/**
@@ -158,7 +180,7 @@ public class UserController {
 	@GetMapping("/search/user")
 	public CollectionModel<EntityModel<UserProfile>> searchUserByUsername(
 			@RequestParam("username") final String username) {
-		log.debug("/search/user called with username '{}'", username);
+		log.debug("get@/search/user called with username '{}'", username);
 		final List<UserProfile> readUsers = userService.findByUsernameContains(username);
 
 		final List<EntityModel<UserProfile>> entityModels = readUsers.stream().map(user -> {
@@ -167,10 +189,74 @@ public class UserController {
 			return user;
 		}).sorted((user1, user2) -> user1.getUsername().compareTo(user2.getUsername()))
 				.map(user -> EntityModel.of(user,
-						linkTo(methodOn(UserController.class).readUserById(user.getId())).withRel("readById")))
+						linkTo(methodOn(UserController.class).readUserById(null, user.getId())).withRel("readById")))
 				.collect(Collectors.toList());
 
 		return CollectionModel.of(entityModels);
+	}
+
+	/**
+	 * Deletes the user, if the id matches the id
+	 * 
+	 * @param bearerJwt
+	 * @param username
+	 * @return {@link ResponseEntity} with {@link HttpStatus} and without body
+	 */
+	@DeleteMapping("/user/{username}")
+	public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String bearerJwt,
+			@PathVariable("username") String username) {
+		log.debug("delete@/user/{} called", username);
+
+		if (null == bearerJwt || bearerJwt.length() < 8)
+			return ResponseEntity.badRequest().build();
+
+		UserProfile readUser = userService.readByUsername(username).orElseThrow(
+				() -> new UserNotFoundException(String.format("User with username '%s' not found.", username)));
+
+		if (!verifyUser(bearerJwt.substring(7), readUser.getUsername()))
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+
+		userService.deleteById(readUser.getId());
+
+		return ResponseEntity.ok().build();
+	}
+
+	/**
+	 * Checks if the client is authenticated and if the authenticated user is trying
+	 * to read his own profile.
+	 * 
+	 * @param jwt
+	 * @param username
+	 * @return true when the authenticated user is reading his own profile,
+	 *         otherwise false.
+	 */
+	private boolean verifyUser(final String jwt, final String username) {
+		if (null == jwt || "".equals(jwt.trim())) {
+			return false;
+		}
+
+		final String jwtUsername = securityTokenService.validateTokenAndGetUsername(jwt);
+
+		if (null != jwtUsername && jwtUsername.equals(username))
+			return true;
+
+		return false;
+	}
+
+	/**
+	 * Creates a copy of the given user and deletes the fields only the user himself
+	 * should get.
+	 * 
+	 * @param readUser
+	 * @return
+	 */
+	private UserProfile anonUser(final UserProfile readUser) {
+		final UserProfile anonUser = readUser;
+
+		anonUser.setId(null);
+		anonUser.setEmail(null);
+
+		return anonUser;
 	}
 
 }
