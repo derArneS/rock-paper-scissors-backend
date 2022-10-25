@@ -100,21 +100,26 @@ public class UserController {
 	 *         repository.
 	 */
 	@GetMapping(value = "/user", params = "id")
-	public EntityModel<UserProfile> readUserById(
-			@RequestHeader(value = "auth-token", required = false) final String jwt, @RequestParam final String id) {
+	public EntityModel<UserDTO> readUserById(@RequestHeader(value = "auth-token", required = false) final String jwt,
+			@RequestParam final String id) {
 		// TODO: needs more testing
 		log.debug("get@/user?id={} called", id);
 		UserProfile readUser = userService.readById(id)
 				.orElseThrow(() -> new UserNotFoundException(String.format("User with id '%s' not found.", id)));
 
+		UserStatistics stats = null;
 		if (!verifyUser(jwt, readUser.getUsername())) {
+			log.debug("jwt doesn't fit the read user");
 			readUser = anonUser(readUser);
+		} else {
+			log.debug("jwt fits the user, reading his stats");
+			stats = userStatisticsService.findById(readUser.getId());
 		}
 
 		// the hashed password should never be given out to the client.
 		readUser.setPassword(null);
 
-		return EntityModel.of(readUser, //
+		return EntityModel.of(new UserDTO(readUser, stats), //
 				linkTo(methodOn(UserController.class).readUserById(null, id)).withSelfRel()); //
 	}
 
@@ -129,7 +134,7 @@ public class UserController {
 	 *         repository.
 	 */
 	@GetMapping(value = "/user", params = "username")
-	public EntityModel<UserProfile> readUserByUsername(
+	public EntityModel<UserDTO> readUserByUsername(
 			@RequestHeader(value = "auth-token", required = false) final String jwt,
 			@RequestParam final String username) {
 		// TODO: needs testing
@@ -137,14 +142,19 @@ public class UserController {
 		UserProfile readUser = userService.readByUsername(username).orElseThrow(
 				() -> new UserNotFoundException(String.format("User with username '%s' not found.", username)));
 
+		UserStatistics stats = null;
 		if (!verifyUser(jwt, readUser.getUsername())) {
+			log.debug("jwt doesn't fit the read user");
 			readUser = anonUser(readUser);
+		} else {
+			log.debug("jwt fits the user, reading his stats");
+			stats = userStatisticsService.findById(readUser.getId());
 		}
 
 		// the hashed password should never be given out to the client.
 		readUser.setPassword(null);
 
-		return EntityModel.of(readUser, //
+		return EntityModel.of(new UserDTO(readUser, stats), //
 				linkTo(methodOn(UserController.class).readUserByUsername(null, username)).withSelfRel()); //
 	}
 
@@ -158,8 +168,8 @@ public class UserController {
 	 *         repository.
 	 */
 	@GetMapping(value = "/user", params = "email")
-	public EntityModel<UserDTO> readUserByEmail(
-			@RequestHeader(value = "auth-token", required = false) final String jwt, @RequestParam final String email) {
+	public EntityModel<UserDTO> readUserByEmail(@RequestHeader(value = "auth-token", required = false) final String jwt,
+			@RequestParam final String email) {
 		// TODO: needs more testing
 		log.debug("get@/user?email={} called", email);
 		UserProfile readUser = userService.readByEmail(email)
