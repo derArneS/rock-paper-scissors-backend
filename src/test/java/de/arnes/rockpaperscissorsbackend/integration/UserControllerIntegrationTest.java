@@ -10,17 +10,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Collections;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -39,7 +37,6 @@ import de.arnes.rockpaperscissorsbackend.rest.security.SecurityTokenService;
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-@RunWith(SpringRunner.class)
 public class UserControllerIntegrationTest {
 
 	@Autowired
@@ -53,13 +50,13 @@ public class UserControllerIntegrationTest {
 
 	private UserProfile userProfile;
 
-	@Before
+	@BeforeEach
 	public void initDb() {
 		UserProfile tempUserProfile = new UserProfile("Arne", "test@test.de", "password");
 		userProfile = userService.create(tempUserProfile);
 	}
 
-	@After
+	@AfterEach
 	public void clearDb() {
 		userService.deleteById(userProfile.getId());
 	}
@@ -106,7 +103,7 @@ public class UserControllerIntegrationTest {
 	}
 
 	/**
-	 * Checks if the saved {@link UserProfile} from {@link Before} is returned
+	 * Checks if the saved {@link UserProfile} from {@link BeforeEach} is returned
 	 * correctly from the repository.
 	 *
 	 * @throws Exception
@@ -138,8 +135,7 @@ public class UserControllerIntegrationTest {
 		final ResultActions result = mockMvc.perform(get("/user?id=" + userProfile.getId()));
 
 		result.andExpect(status().isOk());
-		result.andExpect(jsonPath("id").doesNotExist())
-				.andExpect(jsonPath("username", is(userProfile.getUsername())))
+		result.andExpect(jsonPath("id").doesNotExist()).andExpect(jsonPath("username", is(userProfile.getUsername())))
 				.andExpect(jsonPath("email").doesNotExist())
 				.andExpect(jsonPath("_links.self.href", endsWith("/user?id=" + userProfile.getId())));
 	}
